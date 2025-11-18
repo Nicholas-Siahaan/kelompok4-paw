@@ -11,11 +11,12 @@ const cookieParser = require('cookie-parser');
 
 const app = express();
 const port = process.env.PORT || 5001;
+const VERCEL_HOST = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : '';
 
 // --- KONFIGURASI CORS DENGAN WHITELIST DOMAIN ---
 const whitelist = [
   'https://paw-solinum.netlify.app', // DOMAIN FRONTEND NETLIFY (HTTPS Wajib!)
-  'https://paw-solinum-3efeqzjzh-nicholas-siahaans-projects.vercel.app', // DOMAIN BACKEND VERCEL
+  VERCEL_HOST, // DOMAIN BACKEND VERCEL
   'http://localhost:3000', // Port frontend lokal
   'http://localhost:3001', 
   'http://localhost:5001'  // Port backend lokal
@@ -28,6 +29,7 @@ const corsOptions = {
     if (whitelist.includes(origin) || !origin) {
       callback(null, true);
     } else {
+    console.error(`CORS BLOCKED: Origin ${origin} not in whitelist. Whitelist: ${whitelist.join(', ')}`);
       callback(new Error(`Not allowed by CORS for origin: ${origin}`));
     }
   },
