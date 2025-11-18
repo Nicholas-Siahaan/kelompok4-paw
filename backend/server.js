@@ -39,7 +39,7 @@ const corsOptions = {
 // Terapkan CORS sebelum middleware lainnya
 app.use(cors(corsOptions));
 // Handle preflight requests (OPTIONS method) secara eksplisit
-app.options('*', cors(corsOptions)); // <--- PENANGANAN OPTIONS Wajib untuk Lintas Domain!
+app.options('/', cors(corsOptions)); // <--- PENANGANAN OPTIONS Wajib untuk Lintas Domain!
 
 // ----------------------------------------------------
 
