@@ -1,11 +1,22 @@
+# netlify.toml - Versi Koreksi
+
 [build]
-  base = "frontend"
+  # Tentukan sub-direktori (folder 'frontend') sebagai root proyek
+  base    = "frontend"
+  
+  # Gunakan perintah Next.js standar
   command = "next build"
-  publish = "frontend/.next" 
+  
+  # Hapus baris 'publish = ".next"' untuk membiarkan plugin menanganinya
 
-  # Tambahkan ini kembali jika Anda ingin mengabaikan pemindaian untuk variabel yang diekspos
   [build.environment]
-    SECRETS_SCAN_OMIT_KEYS = "NEXT_PUBLIC_BACKEND_URL" 
+    # Mengabaikan variabel yang bersifat NEXT_PUBLIC dari Secrets Scanning
+    SECRETS_SCAN_OMIT_KEYS = "NEXT_PUBLIC_BACKEND_URL"
 
+# Menambahkan Plugin Next.js Runtime (Wajib untuk App Router/SSR)
 [[plugins]]
   package = "@netlify/plugin-nextjs"
+
+# Environment Variable untuk Production Context
+[context.production.environment]
+  NEXT_PUBLIC_BACKEND_URL = "https://paw-solinum-gvud5xpg9-nicholas-siahaans-projects.vercel.app"
