@@ -1,10 +1,23 @@
 const { buildFinalPdfFromLaporan, getLaporanHistory } = require('../services/finalDocument.service');
 const Laporan = require('../models/LaporanKecelakaan');
 
-function makeVerifyUrl(id) {
-  const port = process.env.PORT || 5001;
-  // return `http://localhost:${port}/finaldoc/laporan/${id}/verify`;
-  return `https://paw-solinum-4gft7rhrj-nicholas-siahaans-projects.vercel.app/finaldoc/laporan/${id}/verify`;
+// FUNGSI UTAMA BARU: Mendapatkan URL Dasar Secara Dinamis
+function getDynamicBaseUrl(req) {
+  // 1. Ambil host (domain dan port) dari request header
+  const host = req.headers.host; 
+  // 2. Tentukan protokol (Vercel selalu menggunakan HTTPS di production)
+  // Vercel/proxy menambahkan header 'x-forwarded-proto' yang bisa kita cek
+  const protocol = req.headers['x-forwarded-proto'] || 'https'; 
+  
+  // Menggabungkan protokol dan host: Contoh output: https://paw-solinum-xxxx.vercel.app
+  return `${protocol}://${host}`;
+}
+
+function makeVerifyUrl(req, id) {
+  // const port = process.env.PORT || 5001;
+  // return `http://localhost:${port}/finaldoc/laporan/${id}/verify`;  
+  const base = getDynamicBaseUrl(req);
+  return `${base}/finaldoc/laporan/${id}/verify`;
 }
 
 // GET /finaldoc/laporan/:id/pdf (inline view)
@@ -109,7 +122,7 @@ async function listFinalDocs(req, res) {
 
     const docs = await Laporan.find(filter).sort({ tanggalKejadian: -1 }).lean();
     const port = process.env.PORT || 5001;
-    const base = `https://paw-solinum-4gft7rhrj-nicholas-siahaans-projects.vercel.app`; // Bisa diganti sesuai deployment
+    const base = getDynamicBaseUrl(req);
 
     const mapped = docs.map(d => ({
       id: d._id,
