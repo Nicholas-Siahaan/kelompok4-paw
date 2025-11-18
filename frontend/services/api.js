@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-export const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001';
+export const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://paw-solinum-gvud5xpg9-nicholas-siahaans-projects.vercel.app';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
