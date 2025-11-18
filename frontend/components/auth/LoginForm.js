@@ -27,7 +27,7 @@ export default function LoginForm({
             Email
           </label>
           <input
-            id="email"
+            id="email-login"
             name="email"
             type="email"
             required
@@ -44,7 +44,7 @@ export default function LoginForm({
           </label>
           <div className="relative">
             <input
-              id="password"
+              id="password-login"
               name="password"
               type={showPassword ? "text" : "password"}
               required
