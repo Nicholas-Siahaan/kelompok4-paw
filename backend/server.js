@@ -11,40 +11,37 @@ const cookieParser = require('cookie-parser');
 
 const app = express();
 const port = process.env.PORT || 5001;
-const VERCEL_HOST = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : '';
+
+// --- KONFIGURASI CORS DENGAN LOGIKA REGEX DINAMIS ---
+// Gunakan variabel lingkungan sebagai fallbacks
 const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || 'https://paw-solinum.netlify.app';
-// --- KONFIGURASI CORS DENGAN WHITELIST DOMAIN ---
-const whitelist = [
-   FRONTEND_ORIGIN,  // Contoh: https://paw-solinum.netlify.app
-  `${FRONTEND_ORIGIN}/`,
-  'https://paw-solinum.netlify.app', // DOMAIN FRONTEND NETLIFY (HTTPS Wajib!)
-  VERCEL_HOST, // DOMAIN BACKEND VERCEL
-  'http://localhost:3000', // Port frontend lokal
-  'http://localhost:3001', 
-  'http://localhost:5001'  // Port backend lokal
-];
+const VERCEL_HOST = process.env.VERCEL_URL; // e.g., 'paw-solinum-xxxx.vercel.app'
+
+// Buat Regular Expression yang fleksibel untuk mencocokkan Netlify dan Vercel
+const allowedOriginsRegex = new RegExp(`(https?:\/\/)?(${FRONTEND_ORIGIN.replace(/https?:\/\//, '')}|${VERCEL_HOST ? VERCEL_HOST.replace(/https?:\/\//, '') : ''}|localhost:\d{4})`);
 
 const corsOptions = {
-  // Fungsi untuk memeriksa apakah origin yang meminta ada di whitelist
+  // Origin akan diizinkan jika cocok dengan Regex, atau jika permintaan non-browser (!origin)
   origin: (origin, callback) => {
-    // Izinkan jika origin ada di whitelist, atau jika origin tidak ada (misalnya, permintaan non-browser/localhost)
-    if (whitelist.includes(origin) || !origin) {
+    // Izinkan jika origin tidak ada (misalnya, permintaan internal/localhost)
+    if (!origin) return callback(null, true);
+
+    // Tes Regex
+    if (allowedOriginsRegex.test(origin)) {
       callback(null, true);
     } else {
-    console.error(`CORS BLOCKED: Origin ${origin} not in whitelist. Whitelist: ${whitelist.join(', ')}`);
+      console.error(`CORS BLOCKED: Origin ${origin} not matched by regex.`);
       callback(new Error(`Not allowed by CORS for origin: ${origin}`));
     }
   },
-  // Wajib untuk mengirim cookies/session dari domain yang berbeda (Netlify ke Vercel)
+  // Wajib untuk mengirim cookies/session dari domain yang berbeda
   credentials: true, 
   optionsSuccessStatus: 200 
 };
 
 // Terapkan CORS sebelum middleware lainnya
 app.use(cors(corsOptions));
-// Handle preflight requests (OPTIONS method) secara eksplisit
-app.options('/', cors(corsOptions)); // <--- PENANGANAN OPTIONS Wajib untuk Lintas Domain!
-
+// PENTING: HAPUS app.options('/')! app.use(cors) akan menangani OPTIONS
 // ----------------------------------------------------
 
 
@@ -64,7 +61,6 @@ app.use(session({
   saveUninitialized: false,
   cookie: {
     // Wajib: Secure=true di produksi (HTTPS)
-    // Diatur true secara default karena SameSite=None memerlukan koneksi aman
     secure: process.env.NODE_ENV === 'production' || true, 
     // Wajib untuk komunikasi lintas domain (CORS)
     sameSite: 'none', 
@@ -79,7 +75,6 @@ app.get('/', (_,res) => res.send('OK - finaldoc branch'));
 
 
 // Security & Middleware
-// Note: CORS sudah diterapkan di atas
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" },
   crossOriginOpenerPolicy: { policy: "unsafe-none" },
