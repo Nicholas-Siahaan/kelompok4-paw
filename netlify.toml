@@ -19,4 +19,4 @@
 
 # Environment Variable untuk Production Context
 [context.production.environment]
-  NEXT_PUBLIC_BACKEND_URL = "https://paw-solinum-mc12sj3oi-nicholas-siahaans-projects.vercel.app/"
+  NEXT_PUBLIC_BACKEND_URL = "https://paw-solinum-c5kfi1ky2-nicholas-siahaans-projects.vercel.app"
