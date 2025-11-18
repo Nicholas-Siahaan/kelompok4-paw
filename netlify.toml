@@ -1,13 +1,40 @@
-# netlify.toml
-
+# Konfigurasi Build Umum
 [build]
-  base    = "frontend"
-  command = "npm run build"
-  publish = ".next"
+  # Perintah yang akan dijalankan Netlify untuk membuat aplikasi Anda
+  command = "next build"
 
-[build.environment]
-  # Tambahkan ini untuk memberitahu Netlify untuk mengabaikan key ini
-  SECRETS_SCAN_OMIT_KEYS = "NEXT_PUBLIC_BACKEND_URL"
+  # Direktori yang berisi file statis yang siap di-serve (hasil build)
+  # Untuk Next.js, ini seringkali diatur secara default oleh plugin, 
+  # tetapi menentukan 'out' jika Anda menggunakan 'next export' (sebelumnya)
+  # atau membiarkannya default untuk SSR/ISR adalah umum.
+  publish = ".next" # Biasanya .next/static
 
-[context.production.environment]
-  NEXT_PUBLIC_BACKEND_URL = "https://paw-solinum-gvud5xpg9-nicholas-siahaans-projects.vercel.app"
+# --- Konfigurasi Plugin Next.js ---
+# Ini adalah bagian PALING PENTING untuk mengatasi masalah 404 (Page Not Found) 
+# karena plugin ini yang mengubah rute server-side (seperti App Router) menjadi Netlify Functions.
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# --- Optional: Konfigurasi Lingkungan Production/Development ---
+
+# [context.production]
+#   command = "npm run build:prod" 
+#   # Atau set environment variables khusus production
+#   environment = { NEXT_PUBLIC_API_URL = "https://api.prod.com" }
+
+# [context.branch-deploy]
+#   command = "npm run build:staging"
+#   environment = { NEXT_PUBLIC_API_URL = "https://api.staging.com" }
+
+
+# --- Optional: Konfigurasi Redirect/Rewrites (Alternatif untuk file _redirects) ---
+
+# [[redirects]]
+#   from = "/old-page"
+#   to = "/new-page"
+#   status = 301 # Redirect Permanen
+
+# [[redirects]]
+#   from = "/*"
+#   to = "/index.html"
+#   status = 200 # Rewrite untuk Fallback SPA (jika diperlukan)
