@@ -4,6 +4,7 @@ const { connectDB } = require('./config/dbConnection');
 const dotenv = require('dotenv').config();
 const cors = require('cors');
 const session = require('express-session');
+const MongoStore = require('connect-mongo'); 
 const passport = require('passport');
 require('./config/passport');  
 const errorHandler = require('./middleware/errorHandler');
@@ -59,6 +60,11 @@ app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGO_URI,
+    collectionName: 'sessions', 
+    touchAfter: 24 * 3600 // Menyimpan sesi ke MongoDB
+  }),
   cookie: {
     // Wajib: Secure=true di produksi (HTTPS)
     secure: process.env.NODE_ENV === 'production' || true, 
