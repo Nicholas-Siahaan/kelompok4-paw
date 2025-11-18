@@ -17,8 +17,8 @@ const whitelist = [
   'https://paw-solinum.netlify.app', // DOMAIN FRONTEND NETLIFY (HTTPS Wajib!)
   'https://paw-solinum-3efeqzjzh-nicholas-siahaans-projects.vercel.app', // DOMAIN BACKEND VERCEL
   'http://localhost:3000', // Port frontend lokal
-  'http://localhost:3001', 
-  'http://localhost:5001'  // Port backend lokal
+  'http://localhost:3001', 
+  'http://localhost:5001'  // Port backend lokal
 ];
 
 const corsOptions = {
@@ -38,6 +38,9 @@ const corsOptions = {
 
 // Terapkan CORS sebelum middleware lainnya
 app.use(cors(corsOptions));
+// Handle preflight requests (OPTIONS method) secara eksplisit
+app.options('*', cors(corsOptions)); // <--- PENANGANAN OPTIONS Wajib untuk Lintas Domain!
+
 // ----------------------------------------------------
 
 
@@ -56,8 +59,10 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    // Wajib: Secure=true di produksi (HTTPS) dan SameSite='none' untuk lintas domain
+    // Wajib: Secure=true di produksi (HTTPS)
+    // Diatur true secara default karena SameSite=None memerlukan koneksi aman
     secure: process.env.NODE_ENV === 'production' || true, 
+    // Wajib untuk komunikasi lintas domain (CORS)
     sameSite: 'none', 
     maxAge: 24 * 60 * 60 * 1000 
   }
@@ -66,21 +71,11 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Debug middleware (Dihapus untuk produksi, hanya menyisakan yang penting)
-/*
-app.use((req, res, next) => {
-  console.log('Request URL:', req.url);
-  console.log('Auth Header:', req.headers.authorization);
-  console.log('Session:', req.session);
-  console.log('User:', req.user);
-  next();
-});
-*/
-
 app.get('/', (_,res) => res.send('OK - finaldoc branch'));
 
 
 // Security & Middleware
+// Note: CORS sudah diterapkan di atas
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" },
   crossOriginOpenerPolicy: { policy: "unsafe-none" },
