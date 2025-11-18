@@ -5,58 +5,86 @@ const dotenv = require('dotenv').config();
 const cors = require('cors');
 const session = require('express-session');
 const passport = require('passport');
-require('./config/passport');  
+require('./config/passport');  
 const errorHandler = require('./middleware/errorHandler');
 const cookieParser = require('cookie-parser');
 
 const app = express();
 const port = process.env.PORT || 5001;
 
+// --- KONFIGURASI CORS DENGAN WHITELIST DOMAIN ---
+const whitelist = [
+  'https://paw-solinum.netlify.app', // DOMAIN FRONTEND NETLIFY (HTTPS Wajib!)
+  'https://paw-solinum-3efeqzjzh-nicholas-siahaans-projects.vercel.app', // DOMAIN BACKEND VERCEL
+  'http://localhost:3000', // Port frontend lokal
+  'http://localhost:3001', 
+  'http://localhost:5001'  // Port backend lokal
+];
+
+const corsOptions = {
+  // Fungsi untuk memeriksa apakah origin yang meminta ada di whitelist
+  origin: (origin, callback) => {
+    // Izinkan jika origin ada di whitelist, atau jika origin tidak ada (misalnya, permintaan non-browser/localhost)
+    if (whitelist.includes(origin) || !origin) {
+      callback(null, true);
+    } else {
+      callback(new Error(`Not allowed by CORS for origin: ${origin}`));
+    }
+  },
+  // Wajib untuk mengirim cookies/session dari domain yang berbeda (Netlify ke Vercel)
+  credentials: true, 
+  optionsSuccessStatus: 200 
+};
+
+// Terapkan CORS sebelum middleware lainnya
+app.use(cors(corsOptions));
+// ----------------------------------------------------
+
+
 // Koneksi database (async untuk Vercel)
 connectDB().catch(err => {
-  console.error('Database connection failed:', err.message);
-  // Jangan exit di serverless environment
+  console.error('Database connection failed:', err.message);
 });
 
 // Session configuration
 if (!process.env.SESSION_SECRET) {
-  console.error('ERROR: SESSION_SECRET is required in environment variables');
-  // Jangan exit di serverless, biarkan error handler yang menangani
+  console.error('ERROR: SESSION_SECRET is required in environment variables');
 }
 
 app.use(session({
-  secret: process.env.SESSION_SECRET,
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    secure: process.env.NODE_ENV === 'production', 
-    maxAge: 24 * 60 * 60 * 1000 
-  }
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    // Wajib: Secure=true di produksi (HTTPS) dan SameSite='none' untuk lintas domain
+    secure: process.env.NODE_ENV === 'production' || true, 
+    sameSite: 'none', 
+    maxAge: 24 * 60 * 60 * 1000 
+  }
 }));
 
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Debug middleware
+// Debug middleware (Dihapus untuk produksi, hanya menyisakan yang penting)
+/*
 app.use((req, res, next) => {
-  console.log('Request URL:', req.url);
-  console.log('Auth Header:', req.headers.authorization);
-  console.log('Session:', req.session);
-  console.log('User:', req.user);
-  next();
+  console.log('Request URL:', req.url);
+  console.log('Auth Header:', req.headers.authorization);
+  console.log('Session:', req.session);
+  console.log('User:', req.user);
+  next();
 });
+*/
 
 app.get('/', (_,res) => res.send('OK - finaldoc branch'));
 
+
 // Security & Middleware
-app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:5001'],
-  credentials: true
-}));
 app.use(helmet({
-  crossOriginResourcePolicy: { policy: "cross-origin" },
-  crossOriginOpenerPolicy: { policy: "unsafe-none" },
-  frameguard: false // Disable X-Frame-Options untuk allow iframe
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+  crossOriginOpenerPolicy: { policy: "unsafe-none" },
+  frameguard: false 
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -74,26 +102,26 @@ app.use(errorHandler);
 
 // Cek variabel lingkungan yang diperlukan (warning only di serverless)
 const requiredEnvVars = [
-  'MONGO_URI',
-  'JWT_SECRET',
-  'EMAIL_USER',
-  'EMAIL_PASS',
-  'GOOGLE_CLIENT_ID',
-  'GOOGLE_CLIENT_SECRET',
-  'SESSION_SECRET'
+  'MONGO_URI',
+  'JWT_SECRET',
+  'EMAIL_USER',
+  'EMAIL_PASS',
+  'GOOGLE_CLIENT_ID',
+  'GOOGLE_CLIENT_SECRET',
+  'SESSION_SECRET'
 ];
 
 requiredEnvVars.forEach(varName => {
-  if (!process.env[varName]) {
-    console.warn(`Missing required environment variable: ${varName}`);
-  }
+  if (!process.env[varName]) {
+    console.warn(`Missing required environment variable: ${varName}`);
+  }
 });
 
 // Start server (hanya untuk local development)
 if (process.env.NODE_ENV !== 'production') {
-  app.listen(port, '0.0.0.0', () => {
-    console.log(`Server is running on port: ${port}`);
-  });
+  app.listen(port, '0.0.0.0', () => {
+    console.log(`Server is running on port: ${port}`);
+  });
 }
 
 // Export untuk Vercel serverless
