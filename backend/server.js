@@ -12,9 +12,11 @@ const cookieParser = require('cookie-parser');
 const app = express();
 const port = process.env.PORT || 5001;
 const VERCEL_HOST = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : '';
-
+const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || 'https://paw-solinum.netlify.app';
 // --- KONFIGURASI CORS DENGAN WHITELIST DOMAIN ---
 const whitelist = [
+   FRONTEND_ORIGIN,  // Contoh: https://paw-solinum.netlify.app
+  `${FRONTEND_ORIGIN}/`,
   'https://paw-solinum.netlify.app', // DOMAIN FRONTEND NETLIFY (HTTPS Wajib!)
   VERCEL_HOST, // DOMAIN BACKEND VERCEL
   'http://localhost:3000', // Port frontend lokal
