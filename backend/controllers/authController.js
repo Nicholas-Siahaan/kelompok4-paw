@@ -262,7 +262,7 @@ const forgotPassword = async (req, res, next) => {
     await user.save();
 
     // Create reset URL
-    const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password/${resetToken}`;
+    const resetUrl = `${process.env.FRONTEND_URL || 'https://paw-solinum.netlify.app'}/reset-password/${resetToken}`;
     
     const message = `Anda menerima email ini karena Anda (atau orang lain) meminta reset password.\n\n
 Silakan klik link berikut atau copy paste ke browser Anda untuk menyelesaikan proses reset password:\n\n

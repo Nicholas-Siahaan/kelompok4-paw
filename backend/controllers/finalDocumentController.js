@@ -3,7 +3,8 @@ const Laporan = require('../models/LaporanKecelakaan');
 
 function makeVerifyUrl(id) {
   const port = process.env.PORT || 5001;
-  return `http://localhost:${port}/finaldoc/laporan/${id}/verify`;
+  // return `http://localhost:${port}/finaldoc/laporan/${id}/verify`;
+  return `https://paw-solinum-4gft7rhrj-nicholas-siahaans-projects.vercel.app/finaldoc/laporan/${id}/verify`;
 }
 
 // GET /finaldoc/laporan/:id/pdf (inline view)
@@ -108,7 +109,7 @@ async function listFinalDocs(req, res) {
 
     const docs = await Laporan.find(filter).sort({ tanggalKejadian: -1 }).lean();
     const port = process.env.PORT || 5001;
-    const base = `http://localhost:${port}`; // Bisa diganti sesuai deployment
+    const base = `https://paw-solinum-4gft7rhrj-nicholas-siahaans-projects.vercel.app`; // Bisa diganti sesuai deployment
 
     const mapped = docs.map(d => ({
       id: d._id,

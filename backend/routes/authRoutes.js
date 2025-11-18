@@ -62,12 +62,12 @@ router.get('/google/callback', (req, res, next) => {
   }, (err, user, info) => {
     if (err) {
       console.error('Google Auth Error:', err);
-      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+      const frontendUrl = process.env.FRONTEND_URL || 'https://paw-solinum.netlify.app';
       return res.redirect(`${frontendUrl}/auth/google/callback?error=${encodeURIComponent(err.message)}`);
     }
     
     if (!user) {
-      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+      const frontendUrl = process.env.FRONTEND_URL || 'https://paw-solinum.netlify.app';
       return res.redirect(`${frontendUrl}/auth/google/callback?error=${encodeURIComponent('Authentication failed')}`);
     }
 
@@ -95,7 +95,7 @@ router.get('/google/callback', (req, res, next) => {
 
     // Redirect to frontend callback page to process token
     // The callback page will store token and redirect to appropriate dashboard
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    const frontendUrl = process.env.FRONTEND_URL || 'https://paw-solinum.netlify.app';
     return res.redirect(`${frontendUrl}/auth/google/callback?token=${encodeURIComponent(token)}`);
   })(req, res, next);
 });
