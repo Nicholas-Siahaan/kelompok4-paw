@@ -1,13 +1,13 @@
 # netlify.toml
 
 [build]
-  # 1. BASE DIRECTORY: Pindah ke folder frontend sebelum build
   base    = "frontend"
-  # 2. COMMAND: Perintah build yang dijalankan di folder 'frontend'
   command = "npm run build"
-  # 3. PUBLISH: Output directory Next.js (relative terhadap folder 'frontend')
-  publish = ".next" 
+  publish = ".next"
+
+[build.environment]
+  # Tambahkan ini untuk memberitahu Netlify untuk mengabaikan key ini
+  SECRETS_SCAN_OMIT_KEYS = "NEXT_PUBLIC_BACKEND_URL"
 
 [context.production.environment]
-  # 4. ENVIRONMENT VARIABLE: Kunci untuk koneksi ke backend Vercel
   NEXT_PUBLIC_BACKEND_URL = "https://paw-solinum-gvud5xpg9-nicholas-siahaans-projects.vercel.app"
