@@ -41,7 +41,7 @@ export default function LoginPage() {
 
   const handleGoogleLogin = () => {
     // Redirect ke endpoint Google OAuth backend
-    const backendUrl = (API_BASE_URL || 'http://localhost:5001').replace(/\/$/, ''); // Remove trailing slash
+    const backendUrl = (API_BASE_URL || 'https://paw-solinum-gvud5xpg9-nicholas-siahaans-projects.vercel.app').replace(/\/$/, ''); // Remove trailing slash
     window.location.href = `${backendUrl}/api/auth/google`;
   };
 
